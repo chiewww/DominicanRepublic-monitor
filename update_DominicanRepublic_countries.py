@@ -10,8 +10,14 @@ def get_countries():
         browser = p.chromium.launch(headless=True)
 
         page = browser.new_page()
-
-        page.goto(URL, wait_until="networkidle")
+        
+        page.goto(
+            URL, 
+            wait_until="domcontentloaded", 
+            timeout=60000
+        )
+        
+        page.wait_for_timeout(10000)
 
         # Wait for initial countries
         page.wait_for_selector(

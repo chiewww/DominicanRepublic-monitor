@@ -9,42 +9,44 @@ def get_countries():
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
 
-        page = browser.new_page(viewport={"width": 1280, "height": 2000})
+        page = browser.new_page()
 
-        page.goto(URL, wait_until="domcontentloaded")
+        page.goto(URL, wait_until="networkidle")
 
-        # Wait for JavaScript rendering
-        page.wait_for_timeout(10000)
+        # Wait for initial countries
+        page.wait_for_selector(
+            ".pde-country-card__name",
+            timeout=30000
+        )
 
-        # Click Mostrar más repeatedly
+        page.wait_for_timeout(3000)
+
+        # Click Mostrar más while it exists
         for i in range(30):
-            button = page.get_by_text("Mostrar más", exact=False)
+            buttons = page.locator("text=Mostrar")
 
-            clicked = False
+            found = False
 
-            for n in range(button.count()):
-                current = button.nth(n)
-
+            for n in range(buttons.count()):
                 try:
-                    if current.is_visible():
-                        current.click(force=True)
-                        page.wait_for_timeout(3000)
-                        clicked = True
-                        break
-                except:
-                    pass
+                    btn = buttons.nth(n)
 
-            if not clicked:
+                    if btn.is_visible():
+                        btn.click()
+                        page.wait_for_timeout(2000)
+                        found = True
+                        break
+
+                except Exception:
+                    continue
+
+            if not found:
                 break
 
-        # Wait again after all clicks
-        page.wait_for_timeout(5000)
-
         countries = page.locator(
-            "h3.pde-country-card__name"
+            ".pde-country-card__name"
         ).all_inner_texts()
 
-        # Debug output
         print("Countries found:", len(countries))
 
         browser.close()

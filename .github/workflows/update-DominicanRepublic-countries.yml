@@ -5,8 +5,8 @@ on:
     - cron: "0 6 * * *"
 
   workflow_dispatch:
-  
-  permissions:
+
+permissions:
   contents: write
 
 jobs:
@@ -14,37 +14,32 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-
       - name: Checkout repository
         uses: actions/checkout@v5
-
 
       - name: Setup Python
         uses: actions/setup-python@v6
         with:
           python-version: "3.x"
 
-
       - name: Install Playwright
         run: |
           pip install playwright
           playwright install chromium
 
-
       - name: Run scraper
         run: |
           python update_DominicanRepublic_countries.py
 
+      - name: Commit updated country list
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
 
-     - name: Commit updated country list
-  run: |
-    git config --global user.name "github-actions"
-    git config --global user.email "github-actions@github.com"
+          git add DominicanRepublic_countries.txt
 
-    git add DominicanRepublic_countries.txt
+          git diff --quiet && echo "No changes" && exit 0
 
-    git diff --quiet && echo "No changes" && exit 0
+          git commit -m "Update DominicanRepublic country list"
 
-    git commit -m "Update DominicanRepublic country list"
-
-    git push
+          git push

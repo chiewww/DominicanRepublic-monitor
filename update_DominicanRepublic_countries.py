@@ -14,18 +14,17 @@ def get_countries():
         page.goto(URL, wait_until="domcontentloaded")
         page.wait_for_timeout(5000)
 
-        # Click "Mostrar más" repeatedly
+        # Click visible "Mostrar más" button repeatedly
         for i in range(30):
-            buttons = page.locator("button")
+            button = page.get_by_text("Mostrar más", exact=False)
 
             clicked = False
 
-            for j in range(buttons.count()):
-                text = buttons.nth(j).inner_text()
+            for n in range(button.count()):
+                current = button.nth(n)
 
-                if "Mostrar" in text:
-                    buttons.nth(j).scroll_into_view_if_needed()
-                    buttons.nth(j).click()
+                if current.is_visible():
+                    current.click(force=True)
                     page.wait_for_timeout(2000)
                     clicked = True
                     break
@@ -33,7 +32,6 @@ def get_countries():
             if not clicked:
                 break
 
-        # Extract countries
         countries = page.locator(
             "h3.pde-country-card__name"
         ).all_inner_texts()

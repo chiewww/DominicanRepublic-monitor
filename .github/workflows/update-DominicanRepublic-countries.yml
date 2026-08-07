@@ -1,0 +1,46 @@
+name: Update DominicanRepublic countries
+
+on:
+  schedule:
+    - cron: "0 6 * * *"
+
+  workflow_dispatch:
+
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+
+      - name: Install Playwright
+        run: |
+          pip install playwright
+          playwright install chromium
+
+
+      - name: Run scraper
+        run: |
+          python update_DominicanRepublic_countries.py
+
+
+      - name: Commit updated country list
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+
+          git add DominicanRepublic_countries.txt
+
+          git commit -m "Update DominicanRepublic country list" || echo "No changes"
+
+          git push

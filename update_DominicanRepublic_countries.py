@@ -11,20 +11,22 @@ def get_countries():
         browser = p.chromium.launch(headless=True)
 
         page = browser.new_page()
+        
+        page.goto(URL, wait_until="domcontentloaded")
+        page.wait_for_timeout(5000)
 
-        page.goto(URL, wait_until="networkidle")
-
-        # Click "Mostrar más" until no button remains
-        while True:
-            button = page.locator("text=/Mostrar m[aá]s/")
+        # Click "Mostrar más" until all countries are loaded
+        for _ in range(20):
+            button = page.get_by_text("Mostrar más", exact=False)
 
             if button.count() == 0:
                 break
 
             try:
-                button.first.click(timeout=3000)
-                page.wait_for_timeout(1000)
-            except:
+                button.first.scroll_into_view_if_needed()
+                button.first.click()
+                page.wait_for_timeout(2000)
+            except Exception:
                 break
 
         # Extract country names

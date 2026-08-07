@@ -12,9 +12,11 @@ def get_countries():
         page = browser.new_page(viewport={"width": 1280, "height": 2000})
 
         page.goto(URL, wait_until="domcontentloaded")
-        page.wait_for_timeout(5000)
 
-        # Click visible "Mostrar más" button repeatedly
+        # Wait for JavaScript rendering
+        page.wait_for_timeout(10000)
+
+        # Click Mostrar más repeatedly
         for i in range(30):
             button = page.get_by_text("Mostrar más", exact=False)
 
@@ -23,18 +25,27 @@ def get_countries():
             for n in range(button.count()):
                 current = button.nth(n)
 
-                if current.is_visible():
-                    current.click(force=True)
-                    page.wait_for_timeout(2000)
-                    clicked = True
-                    break
+                try:
+                    if current.is_visible():
+                        current.click(force=True)
+                        page.wait_for_timeout(3000)
+                        clicked = True
+                        break
+                except:
+                    pass
 
             if not clicked:
                 break
 
+        # Wait again after all clicks
+        page.wait_for_timeout(5000)
+
         countries = page.locator(
             "h3.pde-country-card__name"
         ).all_inner_texts()
+
+        # Debug output
+        print("Countries found:", len(countries))
 
         browser.close()
 
